@@ -2,47 +2,46 @@ import openai
 import os
 
 
-class GPT4AutoCoder:
+class EmailGPT:
     def __init__(self, api_key, gpt_engine_choice):
         # get the key form the streamlit app
         openai.api_key = api_key
         self.gpt_engine_choice = gpt_engine_choice
 
-    # questions is received from the streamlit app
-    def ask_gpt3(self, question):
+    # context is received from the streamlit app
+    def send(self, content, temperature=0.7):
+        system = '''
+            You are a friendly assistant.
+            You specialize in writing short and succinct professional emails.
+            You are friendly and collaborative.
+            You do not use too many extraneious words and phrases.
+            Do not be too formal.
+        '''
         response = openai.ChatCompletion.create(
-            model= self.gpt_engine_choice,
+            model=self.gpt_engine_choice,
             messages=[
-                {"role": "system", "content": "You are a helpful python coding AI who will generate code and provide suggestions for Python projects based on the user's input or generate ideas and code if the user doesn't provide an idea. start the code block with 'python' word. "},
-                {"role": "user", "content": question}
-            ]
+                {"role": "system", "content": system},
+                {"role": "user", "content": content}
+            ],
+            temperature=temperature
         )
 
-        # this part tries to parse the code from the response
-        try:
-            generated_text = response["choices"][0]["message"]["content"]
-            print("GENERATED TEXT: " + generated_text)
-            generated_text = generated_text[:generated_text.rfind('```')]
-            return generated_text.split('python', 1)[1]
-        except IndexError:
-            for i in range(2):
-                response = self.ask_gpt3(question)
-                try:
-                    return generated_text.split('python', 1)[1]
-                except IndexError:
-                    print("Error: GPT-3 failed to generate code. Please try again.")
-                    pass
+        return response["choices"][0].message["content"]
 
-    # this part is used to get the project idea from the user
-    def get_project_idea(self, user_input):
+    def get_email_topic(self, user_input=""):
+        '''
+        Obtain the topic of the desired email from user input.
+        If no input is provided, generate a random topic.
+        '''
+
         if user_input == "":
-            return "Generate a Python project idea and provide sample code . Write the code in one code block between triple backticks."
+            return "Generate an email topic and create an example email."
         else:
-            return f"Generate code for the Python project '{user_input}' . Write the code in one code block between triple backticks. comment the code."
-  
+            return f"Generate am email based on the following topic: '{user_input}'."
+
 
 if __name__ == "__main__":
-    api_key = "<your_api_key>"
-    auto_coder = GPT4AutoCoder(api_key)
-    auto_coder.run()
-
+    api_key = os.getenv('OPENAI_API_KEY')
+    auto_email = EmailGPT(api_key, 'gpt-3.5-turbo')
+    response = auto_email.send(auto_email.get_email_topic())
+    print(response)
