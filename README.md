@@ -1,2 +1,2 @@
-# emailgpt
-GPT powered email writer and formatter.
+# autogpt
+GPT powered content writer and formatter.

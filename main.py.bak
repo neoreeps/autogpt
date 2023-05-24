@@ -1,0 +1,56 @@
+import os
+import streamlit as st
+from utils import AutoGPT
+
+st.set_page_config(page_title="Content GPT Writer", layout="wide")
+st.title("Auto Content")
+st.markdown("### Email and Code Generator")
+
+# Sidebar
+with st.sidebar:
+    st.title("Settings")
+
+    # setup API key to override
+    api_key = st.text_input("Enter your OpenAI API key:", type="password", placeholder="OpenAI API key here")
+
+    # GPT Engine choice
+    gpt_engine_choice = st.radio(
+        "Choose GPT engine (your API KEY must have access to the model):",
+        ("gpt-3.5-turbo", "gpt-4")
+    )
+
+    # we need the type to setup the system prompt correctly
+    content_type = st.radio(
+        "Select the type of content to generate or improve:",
+        ("code", "email")
+    )
+
+# load key from env if not provided
+if not api_key:
+    api_key = os.getenv('OPENAI_API_KEY')
+
+# now let's run this
+auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type)
+
+topic = st.text_input("Enter a topic or leave it blank to rewrite existing content. Note: any content below will override this field:",  # noqa
+                      help="Enter a descripton of your idea here and then select generate to create the content.")
+
+content = st.text_area("OR paste your existing content here if you want to improve it:", height=300,
+                       help="Type or paste your existing content here and then select generate to rewrite it.")
+
+if st.button("Generate Content"):
+    if not api_key:
+        st.title("Please enter your OpenAI API key in the sidebar first!")
+    with st.spinner("Generating ..."):
+        # this looks sloppy to me but it works and is readable
+        gpt_input = None
+        if content:
+            gpt_input = content
+        else:
+            if topic:
+                gpt_input = auto_gpt.get_topic(topic)
+            else:
+                gpt_input = auto_gpt.get_topic("")
+
+        response = auto_gpt.send(gpt_input)
+        st.write(response)
