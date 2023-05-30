@@ -6,7 +6,11 @@ from utils import AutoGPT
 # Set up the layout of the Streamlit app
 st.set_page_config(page_title="Content GPT Writer", layout="wide")
 st.title("Auto Content")
-st.markdown("### Email and Code and Content Generator")
+
+# Predefine variables
+tone = 'normal'
+client = 'coworker'
+lang = 'python'
 
 # Add a sidebar for settings
 with st.sidebar:
@@ -14,6 +18,14 @@ with st.sidebar:
     api_key = st.text_input("Enter your OpenAI API key:", type="password", placeholder="OpenAI API key here")
     gpt_engine_choice = st.radio("Choose GPT engine:", ("gpt-3.5-turbo", "gpt-4"))
     content_type = st.radio("Select the type of content to generate or improve:", ("code", "email", "general"))
+
+    if content_type == "email":
+        tone = st.radio("Select the tone of the email:", ("professional", "funny", "negative", "friendly", "normal"))
+        client = st.radio("Select the audience for the email:", (
+            'boss', 'coworker', 'executive team', 'technical team', 'direct report'))
+    elif content_type == "code":
+        lang = st.radio("Select the language of the code:", ("python", "c/c++", "bash", "html", "javascript", "r"))
+
 
 # Load API key from environment variables if not provided
 if not api_key:
@@ -23,10 +35,21 @@ if not api_key:
 auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type)
 
 # Add text inputs for entering topic and existing content
+st.markdown(f"### {content_type.upper()} Content Generator")
 topic = st.text_input("Enter a topic or leave it blank to rewrite existing content. Note: any content below will override this field:",  # noqa
                       help="Enter a descripton of your idea here and then select generate to create the content.")
 content = st.text_area("OR paste your existing content here if you want to improve it:", height=300,
                        help="Type or paste your existing content here and then select generate to rewrite it.")
+# Update the system prompt for email tone or code language
+if content_type == "email":
+    auto_gpt.system = auto_gpt.system + f"\nThe tone of the email shall be {tone}."
+    auto_gpt.system = auto_gpt.system + f"\nThe email shall be written to target the following audience: {client}."
+elif content_type == "code":
+    auto_gpt.system = auto_gpt.system + \
+        f"\nIf there is existing code, first identify the language and then rewrite it in {lang}." + \
+        f"\nIf this is new code, then write it only in {lang} unless another language was requested."
+
+# Allow the user to update the prompt
 auto_gpt.system = st.text_area("Edit the system prompt below, the default is shown:",
                                auto_gpt.system,
                                height=200)

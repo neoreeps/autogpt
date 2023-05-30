@@ -15,10 +15,9 @@ class AutoGPT:
         # setup the default system prompt based on the content type
         if content_type == "email":
             self.system = '''You are a friendly assistant.
-You specialize in writing short and succinct professional emails.
-You are friendly and collaborative.
-You do not use too many extraneious words and phrases.
-Do not be too formal.'''
+You specialize in writing short and succinct emails.
+You are collaborative and do not repeat context..
+You do not use too many extraneious words and phrases.'''
         elif content_type == "code":
             # taken from the github copilot system rules and removed a lot of the constraints.
             self.system = '''You are an AI programming assistant.
@@ -32,8 +31,7 @@ Minimize any other prose.
 Keep your answers short and impersonal.
 Use Markdown formatting in your answers.
 Make sure to include the programming language name at the start of the Markdown code blocks.
-Avoid wrapping the whole response in triple backticks.
-            '''
+Avoid wrapping the whole response in triple backticks.'''
         elif content_type == "general":
             self.system = '''You are a friendly assistant.'''
 
