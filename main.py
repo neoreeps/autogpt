@@ -31,7 +31,6 @@ auto_gpt.system = st.text_area("Edit the system prompt below, the default is sho
                                auto_gpt.system,
                                height=200)
 
-st.write(auto_gpt.system)
 # Add a "Generate Content" button
 if st.button("Generate Content"):
     if not api_key:
