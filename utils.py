@@ -16,8 +16,11 @@ class AutoGPT:
         if content_type == "email":
             self.system = '''You are a friendly assistant.
 You specialize in writing short and succinct emails.
-You are collaborative and do not repeat context..
-You do not use too many extraneious words and phrases.'''
+You are collaborative and do not repeat context.
+You do not use too many extraneious words and phrases.
+Identify if the request is an existing email or a request for a new one.
+If an existing, then rewrite it, otherwise generate a new email based on the request.
+Minimize any other prose.'''
         elif content_type == "code":
             # taken from the github copilot system rules and removed a lot of the constraints.
             self.system = '''You are an AI programming assistant.
@@ -47,17 +50,6 @@ Avoid wrapping the whole response in triple backticks.'''
         )
 
         return response["choices"][0].message["content"]
-
-    def get_topic(self, user_input=""):
-        '''
-        Obtain the topic of the desired content from user input.
-        If no input is provided, generate a random topic.
-        '''
-
-        if user_input == "":
-            return f"Generate a {self.content_type} topic and create {self.content_type}."
-        else:
-            return f"Generate {self.content_type} based on the following topic: {user_input}."
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@ with st.sidebar:
     # Add radio buttons for choosing GPT engine and content type, and a text input for API key
     api_key = st.text_input("Enter your OpenAI API key:", type="password", placeholder="OpenAI API key here")
     gpt_engine_choice = st.radio("Choose GPT engine:", ("gpt-3.5-turbo", "gpt-4"))
+    temperature = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
     content_type = st.radio("Select the type of content to generate or improve:", ("code", "email", "general"))
 
     if content_type == "email":
@@ -36,9 +37,7 @@ auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type)
 
 # Add text inputs for entering topic and existing content
 st.markdown(f"### {content_type.upper()} Content Generator")
-topic = st.text_input("Enter a topic or leave it blank to rewrite existing content. Note: any content below will override this field:",  # noqa
-                      help="Enter a descripton of your idea here and then select generate to create the content.")
-content = st.text_area("OR paste your existing content here if you want to improve it:", height=300,
+content = st.text_area("Type your request or paste your existing content here if you want to improve it:", height=300,
                        help="Type or paste your existing content here and then select generate to rewrite it.")
 # Update the system prompt for email tone or code language
 if content_type == "email":
@@ -59,16 +58,11 @@ if st.button("Generate Content"):
     if not api_key:
         # Display an error message if API key is not provided
         st.title("Please enter your OpenAI API key in the sidebar first!")
+    elif not content:
+        # Display an error message if there is no content provided
+        st.title("Must add query or content before generating results.")
     else:
         with st.spinner("Generating ..."):
-            # Get the input text to send to the OpenAI API
-            if content:
-                gpt_input = content
-            else:
-                if topic:
-                    gpt_input = auto_gpt.get_topic(topic)
-                else:
-                    gpt_input = auto_gpt.get_topic("")
             # Send request to the OpenAI API and display the generated content
-            response = auto_gpt.send(gpt_input)
+            response = auto_gpt.send(content)
             st.write(response)
