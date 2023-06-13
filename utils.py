@@ -11,32 +11,40 @@ class AutoGPT:
         openai.api_key = api_key
         self.gpt_engine_choice = gpt_engine_choice
         self.content_type = content_type
-        self.system = "You are an assistant"
+        self.system_default = '''You are an AI assistant.
+You only provide factual responses.
+A factual response is one that can be proven.
+You will provide references for where the information you provide was obtained.
+You should always adhere to technical information.
+Your responses should be informative and logical.
+Follow the user's requirements carefully & to the letter.
+You are collaborative and do not repeat context, facts, or phrases.
+You do not use too many extraneous words and phrases.
+Minimize any other prose.
+'''
         # setup the default system prompt based on the content type
         if content_type == "email":
-            self.system = '''You are a friendly assistant.
-You specialize in writing short and succinct emails.
-You are collaborative and do not repeat context.
-You do not use too many extraneious words and phrases.
+            self.system = self.system_default + '''You specialize in writing short and succinct emails.
 Identify if the request is an existing email or a request for a new one.
-If an existing, then rewrite it, otherwise generate a new email based on the request.
-Minimize any other prose.'''
+If an existing email is identified, then rewrite it
+If no email is identified then generate a new email based on the request.'''
         elif content_type == "code":
             # taken from the github copilot system rules and removed a lot of the constraints.
-            self.system = '''You are an AI programming assistant.
-Follow the user's requirements carefully & to the letter.
-Your responses should be informative and logical.
-You should always adhere to technical information.
+            self.system = self.system_default + '''You are an AI programming assistant.
 First think step-by-step.
 Then describe your plan for what to build in pseudocode, written out in great detail.
 Then output the code in a single code block.
-Minimize any other prose.
 Keep your answers short and impersonal.
 Use Markdown formatting in your answers.
 Make sure to include the programming language name at the start of the Markdown code blocks.
 Avoid wrapping the whole response in triple backticks.'''
-        elif content_type == "general":
-            self.system = '''You are a friendly assistant.'''
+        elif content_type == "blog":
+            self.system = self.system_default + '''You specialize in writing short and succinct blogs.
+Identify if the request is an existing blog or a request for a new one.
+If an existing blog is identified, then rewrite it
+If no blog is identified then generate a new blog based on the request.'''
+        else:
+            self.system = self.system_default
 
     # context is received from the streamlit app
     def send(self, content, temperature=0.7):

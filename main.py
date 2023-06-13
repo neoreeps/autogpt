@@ -8,7 +8,7 @@ st.set_page_config(page_title="Content GPT Writer", layout="wide")
 st.title("Auto Content")
 
 # Predefine variables
-tone = 'normal'
+tone = 'professional'
 client = 'coworker'
 lang = 'python'
 
@@ -18,12 +18,12 @@ with st.sidebar:
     api_key = st.text_input("Enter your OpenAI API key:", type="password", placeholder="OpenAI API key here")
     gpt_engine_choice = st.radio("Choose GPT engine:", ("gpt-3.5-turbo", "gpt-4"))
     temperature = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
-    content_type = st.radio("Select the type of content to generate or improve:", ("code", "email", "general"))
+    content_type = st.radio("Select the type of content to generate or improve:", ("code", "email", "blog", "general"))
 
     if content_type == "email":
-        tone = st.radio("Select the tone of the email:", ("professional", "funny", "negative", "friendly", "normal"))
+        tone = st.radio("Select the tone of the email:", ("professional", "funny", "negative", "friendly"))
         client = st.radio("Select the audience for the email:", (
-            'boss', 'coworker', 'executive team', 'technical team', 'direct report'))
+            'boss', 'coworker', 'executive', 'engineer', 'direct report'))
     elif content_type == "code":
         lang = st.radio("Select the language of the code:", ("python", "c/c++", "bash", "html", "javascript", "r"))
 
