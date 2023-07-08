@@ -16,14 +16,15 @@ lang = 'python'
 with st.sidebar:
     # Add radio buttons for choosing GPT engine and content type, and a text input for API key
     api_key = st.text_input("Enter your OpenAI API key:", type="password", placeholder="OpenAI API key here")
-    gpt_engine_choice = st.radio("Choose GPT engine:", ("gpt-3.5-turbo", "gpt-4"))
+    gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-3.5-turbo", "gpt-4"))
     temperature = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
-    content_type = st.radio("Select the type of content to generate or improve:", ("code", "email", "blog", "general"))
+    content_type = st.radio("Select the type of content to generate or improve:",
+                            ("general", "code", "email", "blog"))
 
     if content_type == "email":
-        tone = st.radio("Select the tone of the email:", ("professional", "funny", "negative", "friendly"))
-        client = st.radio("Select the audience for the email:", (
-            'boss', 'coworker', 'executive', 'engineer', 'direct report'))
+        tone = st.selectbox("Select the tone of the email:", ("professional", "funny", "negative", "friendly"))
+        client = st.radio("Select the audience for the email:",
+                          ('boss', 'coworker', 'executive', 'engineer', 'direct report'))
     elif content_type == "code":
         lang = st.radio("Select the language of the code:", ("python", "c/c++", "bash", "html", "javascript", "r"))
 
