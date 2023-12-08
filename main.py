@@ -37,8 +37,9 @@ auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type)
 
 # Add text inputs for entering topic and existing content
 st.markdown(f"### {content_type.upper()} Content Generator")
-content = st.text_area("Type your request or paste your existing content here if you want to improve it:", height=300,
-                       help="Type or paste your existing content here and then select generate to rewrite it.")
+# content = st.text_area("Type your request or paste your existing content here if you want to improve it:", height=300,
+#                       help="Type or paste your existing content here and then select generate to rewrite it.")
+
 # Update the system prompt for email tone or code language
 if content_type == "email":
     auto_gpt.system = auto_gpt.system + f"\nThe tone of the email shall be {tone}."
@@ -53,16 +54,10 @@ auto_gpt.system = st.text_area("Edit the system prompt below, the default is sho
                                auto_gpt.system,
                                height=200)
 
-# Add a "Generate Content" button
-if st.button("Generate Content"):
-    if not api_key:
-        # Display an error message if API key is not provided
-        st.title("Please enter your OpenAI API key in the sidebar first!")
-    elif not content:
-        # Display an error message if there is no content provided
-        st.title("Must add query or content before generating results.")
-    else:
-        with st.spinner("Generating ..."):
-            # Send request to the OpenAI API and display the generated content
-            response = auto_gpt.send(content)
-            st.write(response)
+message = st.chat_message("assistant")
+message.write("Hello Human!")
+content = st.chat_input("Type your request or paste your existing content here if you want to improve it:")
+
+if content:
+    message.write(content)
+    message.write(auto_gpt.send(content, temperature))
