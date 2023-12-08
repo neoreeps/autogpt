@@ -6,6 +6,7 @@ from utils import AutoGPT
 # Set up the layout of the Streamlit app
 st.set_page_config(page_title="Content GPT Writer", layout="wide")
 st.title("Auto Content")
+st.write('See the code: https://github.com/neoreeps/autogpt')
 
 # Predefine variables
 tone = 'professional'
@@ -15,8 +16,10 @@ lang = 'python'
 # Add a sidebar for settings
 with st.sidebar:
     # Add radio buttons for choosing GPT engine and content type, and a text input for API key
-    api_key = st.text_input("Enter your OpenAI API key:", type="password", placeholder="OpenAI API key here")
-    gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4", "gpt-3.5-turbo"))
+    api_key = os.getenv('OPENAI_API_KEY', None)
+    if not api_key:
+        api_key = st.text_input("Enter your OpenAI API key:", type="password", placeholder="OpenAI APIkey here")
+    gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4-1106-preview", "gpt-4", "gpt-3.5-turbo"))
     temperature = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
     content_type = st.radio("Select the type of content to generate or improve:",
                             ("general", "code", "email", "blog"))
@@ -28,10 +31,6 @@ with st.sidebar:
     elif content_type == "code":
         lang = st.radio("Select the language of the code:", ("python", "c/c++", "bash", "html", "javascript", "r"))
 
-
-# Load API key from environment variables if not provided
-if not api_key:
-    api_key = os.getenv('OPENAI_API_KEY')
 
 # Create an instance of the AutoGPT class
 auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type)
