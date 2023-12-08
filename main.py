@@ -37,8 +37,6 @@ auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type)
 
 # Add text inputs for entering topic and existing content
 st.markdown(f"### {content_type.upper()} Content Generator")
-# content = st.text_area("Type your request or paste your existing content here if you want to improve it:", height=300,
-#                       help="Type or paste your existing content here and then select generate to rewrite it.")
 
 # Update the system prompt for email tone or code language
 if content_type == "email":
@@ -50,9 +48,10 @@ elif content_type == "code":
         f"\nIf this is new code, then write it only in {lang} unless another language was requested."
 
 # Allow the user to update the prompt
-auto_gpt.system = st.text_area("Edit the system prompt below, the default is shown:",
-                               auto_gpt.system,
-                               height=200)
+with st.expander("Edit the system prompt below, the default is shown:"):
+    auto_gpt.system = st.text_area("System Prompt:",
+                                   auto_gpt.system,
+                                   height=200)
 
 message = st.chat_message("assistant")
 message.write("Hello Human!")
@@ -60,4 +59,5 @@ content = st.chat_input("Type your request or paste your existing content here i
 
 if content:
     message.write(content)
-    message.write(auto_gpt.send(content, temperature))
+    with st.spinner("Thinking..."):
+        message.write(auto_gpt.send(content, temperature))
