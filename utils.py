@@ -6,12 +6,11 @@ class AutoGPT:
     '''
     Class to setup the the GPT interface and a couple helper functions.
     '''
-    def __init__(self, api_key, gpt_engine_choice, content_type, history_len):
+    def __init__(self, api_key, gpt_engine_choice, content_type):
         # get the key form the streamlit app
         openai.api_key = api_key
         self.gpt_engine = gpt_engine_choice
         self.content_type = content_type
-        self.history_len = history_len
         self.messages = []
         self.system_default = '''
 You are an AI assistant.
@@ -56,9 +55,9 @@ If no blog is identified then generate a new blog based on the request.'''
         self.messages.append({"role": "system", "content": self.system})
 
     # context is received from the streamlit app
-    def send(self, content, temperature=0.7):
+    def send(self, content, temperature, history_len):
         self.messages.append({"role": "user", "content": content})
-        messages = self.messages[-self.history_len:]
+        messages = self.messages[-history_len:]
 
         response = openai.ChatCompletion.create(
             model=self.gpt_engine,

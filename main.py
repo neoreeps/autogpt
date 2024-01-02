@@ -36,8 +36,8 @@ with st.sidebar:
 
 
 # Create an instance of the AutoGPT class
-if st.session_state.auto_gpt is None:
-    st.session_state.auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type, history_len)
+if 'auto_gpt' not in st.session_state:
+    st.session_state.auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type)
 
 # Get the instance of the AutoGPT class
 auto_gpt = st.session_state.auto_gpt
@@ -67,4 +67,4 @@ content = st.chat_input("Type your request or paste your existing content here i
 if content:
     message.write(content)
     with st.spinner("Thinking..."):
-        message.write(auto_gpt.send(content, temperature))
+        message.write(auto_gpt.send(content, temperature, history_len))
