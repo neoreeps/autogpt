@@ -57,7 +57,6 @@ If no blog is identified then generate a new blog based on the request.'''
 
     # context is received from the streamlit app
     def send(self, content, temperature=0.7):
-        print(f'messages: {self.messages}')
         self.messages.append({"role": "user", "content": content})
         messages = self.messages[-self.history_len:]
 
