@@ -21,6 +21,7 @@ with st.sidebar:
         api_key = st.text_input("Enter your OpenAI API key:", type="password", placeholder="OpenAI APIkey here")
     gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4-1106-preview", "gpt-4", "gpt-3.5-turbo"))
     temperature = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
+    history_len = st.slider("Select the history length:", 1, 25, 15)
     content_type = st.radio("Select the type of content to generate or improve:",
                             ("general", "code", "email", "blog"))
 
@@ -29,11 +30,17 @@ with st.sidebar:
         client = st.radio("Select the audience for the email:",
                           ('boss', 'coworker', 'executive', 'engineer', 'direct report'))
     elif content_type == "code":
-        lang = st.radio("Select the language of the code:", ("python", "c/c++", "bash", "html", "javascript", "r"))
+        lang = st.radio("Select the initial language of the code: \
+                \n(Note: you may convert code at any time by simply asking the assistant to convert the code)",
+                        ("python", "c/c++", "bash", "html", "javascript", "r"))
 
 
 # Create an instance of the AutoGPT class
-auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type)
+if st.session_state.auto_gpt is None:
+    st.session_state.auto_gpt = AutoGPT(api_key, gpt_engine_choice, content_type, history_len)
+
+# Get the instance of the AutoGPT class
+auto_gpt = st.session_state.auto_gpt
 
 # Add text inputs for entering topic and existing content
 st.markdown(f"### {content_type.upper()} Content Generator")
