@@ -77,6 +77,7 @@ def main() -> None:
             st.write("You must provide an OpenAI API key set in the environment.")
 
         gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4-1106-preview", "gpt-4", "gpt-3.5-turbo"))
+
         temp = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
         hist_len = st.slider("Select the history length:", 1, 25, 15)
         content_type = st.radio("Select the type of content to generate or improve:",
@@ -106,8 +107,12 @@ def main() -> None:
         elif content_type == "blog":
             welcome = "Tell me what you'd like the blog to say, or paste an existing blog here if you want to improve it."  # noqa
 
+        if 'chatbot' in st.session_state and gpt_engine_choice != st.session_state.gpt_engine:
+            del st.session_state.chatbot
+
     # Create an instance of the ChatBot class only once
     if 'chatbot' not in st.session_state:
+        st.session_state.gpt_engine = gpt_engine_choice
         st.session_state.chatbot = ChatBot(openai_api_key, gpt_engine_choice)
 
     # Get the instance of the ChatBot class

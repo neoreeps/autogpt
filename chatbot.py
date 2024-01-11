@@ -6,8 +6,8 @@ class ChatBot:
     '''
     Class to setup the the GPT interface and a couple helper functions.
     '''
-    def __init__(self, api_key, gpt_engine_choice="gpt-4"):
-        print("\ninit chatbot\n")
+    def __init__(self, api_key, gpt_engine_choice="gpt-4-1106-preview"):
+        print(f"\ninit chatbot...{gpt_engine_choice}\n")
         # get the key form the streamlit app
         self.client = OpenAI(api_key=api_key)
         self.gpt_engine = gpt_engine_choice
