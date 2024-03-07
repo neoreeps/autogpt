@@ -13,6 +13,20 @@ SYSTEM_PROMPT = \
 def parse_base_model_with_retries(
     raw_response: str, base_model: pydantic.BaseModel, retries: int = 3
 ) -> pydantic.BaseModel:
+    """
+    Parses the raw response using the specified base model with retries.
+
+    Args:
+        raw_response (str): The raw response to parse.
+        base_model (pydantic.BaseModel): The base model to use for parsing.
+        retries (int, optional): The number of retries to attempt. Defaults to 3.
+
+    Returns:
+        pydantic.BaseModel: The parsed base model.
+
+    Raises:
+        ValueError: If the parsing fails after the specified number of retries.
+    """
 
     openai_api_key = os.getenv('OPENAI_API_KEY', None)
     chatbot = ChatBot(openai_api_key)
@@ -39,6 +53,18 @@ def _format_fix_prompt(
     base_model: pydantic.BaseModel,
     exception: Exception,
 ) -> str:
+    """
+    Formats the fix prompt with the JSON schema, faulty input, error message, and fixed input.
+
+    Args:
+        updated_input_str (str): The updated input string.
+        base_model (pydantic.BaseModel): The base model used for validation.
+        exception (Exception): The exception raised during validation.
+
+    Returns:
+        str: The formatted fix prompt.
+
+    """
     return f'''
 JSON_SCHEMA:
 {base_model.schema()}

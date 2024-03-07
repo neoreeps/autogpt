@@ -1,6 +1,7 @@
 import os
 import json
 import streamlit as st
+from docx import Document
 from streamlit_chat import message
 from chatbot import ChatBot
 from todoist_repair_agent import parse_base_model_with_retries
@@ -16,7 +17,38 @@ from todoist_agent.models import (
 )
 
 
+def read_docx(file):
+    """
+    Read the contents of a .docx file and return the full text.
+
+    Args:
+        file (str): The path to the .docx file.
+
+    Returns:
+        str: The full text extracted from the .docx file.
+    """
+    doc = Document(file)
+    full_text = []
+    for para in doc.paragraphs:
+        full_text.append(para.text)
+    return "\n".join(full_text)
+
+
 def todoist_agent_loop(chatbot, user_input, temp, hist_len, max_actions, todoist_api_key):
+    """
+    Executes a loop of actions for a Todoist agent.
+
+    Args:
+        chatbot (Chatbot): The chatbot instance.
+        user_input (str): The user's input.
+        temp (float): The temperature value for generating responses.
+        hist_len (int): The length of chat history to consider.
+        max_actions (int): The maximum number of actions to perform.
+        todoist_api_key (str): The API key for Todoist.
+
+    Returns:
+        None
+    """
     chatbot.set_todoist_prompt(ReactResponse, user_input)
     todoist = TodoistActionToolKit(todoist_api_key)
 
@@ -59,15 +91,20 @@ def todoist_agent_loop(chatbot, user_input, temp, hist_len, max_actions, todoist
 
 
 def main() -> None:
+    """
+    The main function that sets up the Streamlit app and handles user interactions.
+
+    Returns:
+        None
+    """
+    # preload variables
+    uploaded_file_1 = None
+    uploaded_file_2 = None
+
     # Set up the layout of the Streamlit app
     st.set_page_config(page_title="Content GPT Writer", layout="wide")
     st.title("Auto Content")
     st.write('See the code: https://github.com/neoreeps/autogpt')
-
-    # Predefine variables
-    tone = 'professional'
-    client = 'coworker'
-    lang = 'python'
 
     # Add a sidebar for settings
     with st.sidebar:
@@ -76,27 +113,24 @@ def main() -> None:
         if not openai_api_key:
             st.write("You must provide an OpenAI API key set in the environment.")
 
-        gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4-1106-preview", "gpt-4", "gpt-3.5-turbo"))
+        gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4-turbo-preview",
+                                                                "davinci", "gpt-4", "gpt-3.5-turbo"))
 
         temp = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
         hist_len = st.slider("Select the history length:", 1, 25, 15)
         content_type = st.radio("Select the type of content to generate or improve:",
-                                ("general", "code", "email", "blog", "todoist"))
+                                ("general", "code", "document", "todoist"))
 
         welcome = "Ask me anything and I'll do my best." + \
             f"  I remember context up to the last {hist_len} messages." + \
-            "  I can generate or improve code, emails, blogs, and todo lists."
+            "  I can generate or improve code and todo lists."
 
-        if content_type == "email":
-            tone = st.selectbox("Select the tone of the email:", ("professional", "funny", "negative", "friendly"))
-            client = st.radio("Select the audience for the email:",
-                              ('boss', 'coworker', 'executive', 'engineer', 'direct report'))
-            welcome = "Tell me what you'd like the email to say, or paste an existing email here if you want to improve it."  # noqa
-        elif content_type == "code":
-            lang = st.radio("Select the initial language of the code: \
-                    \n(Note: you may convert code at any time by simply asking the assistant to convert the code)",
-                            ("python", "c/c++", "bash", "html", "javascript", "r"))
+        if content_type == "code":
             welcome = "Tell me what you'd like the code to do, or paste existing code here if you want to improve it."  # noqa
+        elif content_type == "document":
+            welcome = "Use the input and output document fields to specify the content."
+            uploaded_file_1 = st.file_uploader("Choose input Word document 1", type=["docx"])
+            uploaded_file_2 = st.file_uploader("Choose input Word document 2", type=["docx"])
         elif content_type == "todoist":
             todoist_api_key = os.getenv('TODOIST_API_KEY', None)
             if not todoist_api_key:
@@ -104,8 +138,6 @@ def main() -> None:
             max_actions = st.slider("Select the maximum number of actions to take:", 1, 300, 50)
             st.write("Todoist integration based largely on https://github.com/j0rd1smit/todoist_react_agent")
             welcome = "Ask me about your todo list or what you'd like to add to it."
-        elif content_type == "blog":
-            welcome = "Tell me what you'd like the blog to say, or paste an existing blog here if you want to improve it."  # noqa
 
         if 'chatbot' in st.session_state and gpt_engine_choice != st.session_state.gpt_engine:
             del st.session_state.chatbot
@@ -121,20 +153,12 @@ def main() -> None:
     # Add text inputs for entering topic and existing content
     st.markdown(f"### {content_type.upper()} Content Generator")
 
-    # Update the system prompt for email tone or code language
-    if content_type == "email":
-        ext_prompt = \
-            f"\nThe tone of the email shall be {tone}." + \
-            f"\nThe email shall be written to target the following audience: {client}."
-
-    elif content_type == "code":
-        ext_prompt = \
-            f"\nIf there is existing code, first identify the language and then rewrite it in {lang}." + \
-            f"\nIf this is new code, then write it only in {lang} unless another language was requested."
-    else:
-        ext_prompt = "\nFollow the user's requirements carefully & to the letter."
-
     # Set the system prompt
+    ext_prompt = "\nFollow the user's requirements carefully & to the letter."
+    if uploaded_file_1 is not None:
+        ext_prompt = ext_prompt + f"\nDOCUMENT1: {read_docx(uploaded_file_1)}"
+    if uploaded_file_2 is not None:
+        ext_prompt = ext_prompt + f"\nDOCUMENT2: {read_docx(uploaded_file_2)}"
     chatbot.set_system_prompt(content_type, ext_prompt)
 
     # Allow the user to update the prompt
@@ -164,7 +188,8 @@ def main() -> None:
 
     if st.button("Clear"):
         chatbot.messages = chatbot.messages[:1]
-        message("History has been reset.", is_user=False)
+        # Refresh the page to show changes
+        st.rerun()
 
 
 if __name__ == "__main__":
