@@ -29,8 +29,17 @@ def read_docx(file):
     """
     doc = Document(file)
     full_text = []
+
+    for i in range(0, len(doc.tables)):
+        full_text.append(f"\nTable {i+1}")
+        table = doc.tables[i]
+        for row in table.rows:
+            for cell in row.cells:
+                full_text.append(cell.text)
+
     for para in doc.paragraphs:
         full_text.append(para.text)
+
     return "\n".join(full_text)
 
 
@@ -103,7 +112,7 @@ def main() -> None:
 
     # Set up the layout of the Streamlit app
     st.set_page_config(page_title="Content GPT Writer", layout="wide")
-    st.title("Auto Content")
+    st.title("Auto GPT")
     st.write('See the code: https://github.com/neoreeps/autogpt')
 
     # Add a sidebar for settings
@@ -151,7 +160,7 @@ def main() -> None:
     chatbot = st.session_state.chatbot
 
     # Add text inputs for entering topic and existing content
-    st.markdown(f"### {content_type.upper()} Content Generator")
+    st.markdown(f"### {content_type.upper()} Generator")
 
     # Set the system prompt
     ext_prompt = "\nFollow the user's requirements carefully & to the letter."

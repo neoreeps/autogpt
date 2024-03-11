@@ -17,7 +17,7 @@ class ChatBot:
 
     Methods:
         __init__(self, api_key, gpt_engine_choice="gpt-4-1106-preview"): Initializes the ChatBot instance.
-        set_todoist_prompt(self, react_model: pydantic.BaseModel, question: str) -> str: Sets the prompt for a Todoist task.
+        set_todoist_prompt(self, react_model: pydantic.BaseModel, question: str) -> str: Sets the prompt for a Todoist task.  # noqa
         set_system_prompt(self, content_type, ext_prompt): Sets the system prompt based on the content type.
         send(self, role, content, temp, hist_len): Sends a message to the chatbot and receives a response.
         set_message_content(self, index, content): Sets the content of a message in the chat.
@@ -61,19 +61,18 @@ class ChatBot:
         Returns:
             str: The system prompt for the Todoist task.
         '''
-        prompt = \
-                "You are a getting things done (GTD) agent." + \
-                f"\nIt is your job to accomplish the following task: {question}" + \
-                "\nYou have access to multiple tools to accomplish this task." + \
-                "\nSee the action in the json schema for the available tools." + \
-                "\nIf you have insufficient information to answer the question," + \
-                "you can use the tools to get more information." + \
-                "\nAll your answers must be in json format and follow the following schema json schema:" + \
-                f"{react_model.schema()}" + \
-                "\nIf your json response asks me to preform an action, I will preform that action." + \
-                "\nI will then respond with the result of that action." + \
-                f"\nLet's begin to answer the question: {question}" + \
-                "\nDo not write anything other than json!"
+        prompt = "You are a getting things done (GTD) agent." + \
+                 f"\nIt is your job to accomplish the following task: {question}" + \
+                 "\nYou have access to multiple tools to accomplish this task." + \
+                 "\nSee the action in the json schema for the available tools." + \
+                 "\nIf you have insufficient information to answer the question," + \
+                 "you can use the tools to get more information." + \
+                 "\nAll your answers must be in json format and follow the following schema json schema:" + \
+                 f"{react_model.schema()}" + \
+                 "\nIf your json response asks me to preform an action, I will preform that action." + \
+                 "\nI will then respond with the result of that action." + \
+                 f"\nLet's begin to answer the question: {question}" + \
+                 "\nDo not write anything other than json!"
         return self.set_system_prompt("todoist", prompt)
 
     def set_system_prompt(self, content_type, ext_prompt):
