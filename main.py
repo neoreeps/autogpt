@@ -1,5 +1,6 @@
 import os
 import json
+import fitz
 import streamlit as st
 from docx import Document
 from streamlit_chat import message
@@ -17,7 +18,7 @@ from todoist_agent.models import (
 )
 
 
-def read_docx(file):
+def read_text_from_file(file):
     """
     Read the contents of a .docx file and return the full text.
 
@@ -27,20 +28,28 @@ def read_docx(file):
     Returns:
         str: The full text extracted from the .docx file.
     """
-    doc = Document(file)
-    full_text = []
-
-    for i in range(0, len(doc.tables)):
-        full_text.append(f"\nTable {i+1}")
-        table = doc.tables[i]
-        for row in table.rows:
-            for cell in row.cells:
-                full_text.append(cell.text)
-
-    for para in doc.paragraphs:
-        full_text.append(para.text)
-
-    return "\n".join(full_text)
+    file_type = file.name.split(".")[-1].lower()
+    if file_type == "docx":
+        doc = Document(file)
+        full_text = []
+        for i in range(0, len(doc.tables)):
+            full_text.append(f"\nTable {i+1}")
+            table = doc.tables[i]
+            for row in table.rows:
+                for cell in row.cells:
+                    full_text.append(cell.text)
+        for para in doc.paragraphs:
+            full_text.append(para.text)
+        return "\n".join(full_text)
+    elif file_type == "pdf":
+        print(file)
+        text = ""
+        with fitz.open(file, file.read()) as doc:
+            for page in doc:
+                text += page.get_text()
+        return text
+    else:
+        return "Unsupported file type"
 
 
 def todoist_agent_loop(chatbot, user_input, temp, hist_len, max_actions, todoist_api_key):
@@ -138,8 +147,8 @@ def main() -> None:
             welcome = "Tell me what you'd like the code to do, or paste existing code here if you want to improve it."  # noqa
         elif content_type == "document":
             welcome = "Use the input and output document fields to specify the content."
-            uploaded_file_1 = st.file_uploader("Choose input Word document 1", type=["docx"])
-            uploaded_file_2 = st.file_uploader("Choose input Word document 2", type=["docx"])
+            uploaded_file_1 = st.file_uploader("Choose Document 1", type=["docx", "pdf"])
+            uploaded_file_2 = st.file_uploader("Choose Document 2", type=["docx", "pdf"])
         elif content_type == "todoist":
             todoist_api_key = os.getenv('TODOIST_API_KEY', None)
             if not todoist_api_key:
@@ -165,9 +174,9 @@ def main() -> None:
     # Set the system prompt
     ext_prompt = "\nFollow the user's requirements carefully & to the letter."
     if uploaded_file_1 is not None:
-        ext_prompt = ext_prompt + f"\nDOCUMENT1: {read_docx(uploaded_file_1)}"
+        ext_prompt = ext_prompt + f"\nDOCUMENT1: {read_text_from_file(uploaded_file_1)}"
     if uploaded_file_2 is not None:
-        ext_prompt = ext_prompt + f"\nDOCUMENT2: {read_docx(uploaded_file_2)}"
+        ext_prompt = ext_prompt + f"\nDOCUMENT2: {read_text_from_file(uploaded_file_2)}"
     chatbot.set_system_prompt(content_type, ext_prompt)
 
     # Allow the user to update the prompt
