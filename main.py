@@ -16,9 +16,10 @@ from todoist_agent.models import (
     GiveFinalAnswerAction,
     MoveTaskAction,
 )
+from logger import get_logger
 
 
-def read_text_from_file(file):
+def read_text_from_file(file, log):
     """
     Read the contents of a .docx file and return the full text.
 
@@ -28,6 +29,7 @@ def read_text_from_file(file):
     Returns:
         str: The full text extracted from the .docx file.
     """
+    log.info(f"Reading text from file: {file}")
     file_type = file.name.split(".")[-1].lower()
     if file_type == "docx":
         doc = Document(file)
@@ -42,13 +44,13 @@ def read_text_from_file(file):
             full_text.append(para.text)
         return "\n".join(full_text)
     elif file_type == "pdf":
-        print(file)
         text = ""
         with fitz.open(file, file.read()) as doc:
             for page in doc:
                 text += page.get_text()
         return text
     else:
+        log.error(f"Unsupported file type: {file_type}")
         return "Unsupported file type"
 
 
@@ -115,6 +117,15 @@ def main() -> None:
     Returns:
         None
     """
+    if 'logger' in st.session_state:
+        del st.session_state.logger
+
+    # Set up logging
+    st.session_state.logger = get_logger("main")
+    log = st.session_state.logger
+
+    log.info("Starting main function")
+
     # preload variables
     uploaded_file_1 = None
     uploaded_file_2 = None
@@ -131,9 +142,8 @@ def main() -> None:
         if not openai_api_key:
             st.write("You must provide an OpenAI API key set in the environment.")
 
-        gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4-turbo-preview",
-                                                                "davinci", "gpt-4", "gpt-3.5-turbo"))
-
+        gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4-turbo-preview", "gpt-4", "gpt-3.5-turbo"))
+        log.debug(f"Selected GPT engine: {gpt_engine_choice}")
         temp = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
         hist_len = st.slider("Select the history length:", 1, 25, 15)
         content_type = st.radio("Select the type of content to generate or improve:",
@@ -174,9 +184,9 @@ def main() -> None:
     # Set the system prompt
     ext_prompt = "\nFollow the user's requirements carefully & to the letter."
     if uploaded_file_1 is not None:
-        ext_prompt = ext_prompt + f"\nDOCUMENT1: {read_text_from_file(uploaded_file_1)}"
+        ext_prompt = ext_prompt + f"\nDOCUMENT1: {read_text_from_file(uploaded_file_1, log)}"
     if uploaded_file_2 is not None:
-        ext_prompt = ext_prompt + f"\nDOCUMENT2: {read_text_from_file(uploaded_file_2)}"
+        ext_prompt = ext_prompt + f"\nDOCUMENT2: {read_text_from_file(uploaded_file_2, log)}"
     chatbot.set_system_prompt(content_type, ext_prompt)
 
     # Allow the user to update the prompt

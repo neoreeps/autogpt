@@ -1,6 +1,7 @@
 import pydantic
 from datetime import datetime
 from openai import OpenAI
+from logger import get_logger
 
 
 class ChatBot:
@@ -32,7 +33,8 @@ class ChatBot:
             api_key (str): The API key for accessing the GPT service.
             gpt_engine_choice (str): The choice of GPT engine to use (default: "gpt-4-1106-preview").
         '''
-        print(f"\ninit chatbot...{gpt_engine_choice}\n")
+        log = get_logger(__name__)
+        log.info(f"Init chatbot...{gpt_engine_choice}\n")
         # get the key form the streamlit app
         self.client = OpenAI(api_key=api_key)
         self.gpt_engine = gpt_engine_choice
