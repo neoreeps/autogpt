@@ -8,6 +8,6 @@ This is a streamlit based app that requires an openai api key.
 
 Install:
 ``` bash
-pip install -R requirements.txt
+pip install -r requirements.txt
 streamlit run main.py
 ```
