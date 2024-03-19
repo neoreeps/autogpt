@@ -10,6 +10,10 @@ from todoist_api_python.api import Project, TodoistAPI
 
 
 class TodoistActionToolKit:
+    """
+    A class that provides various actions and utilities for interacting with Todoist API.
+    """
+
     def __init__(self, api_key: str) -> None:
         self.api = TodoistAPI(api_key)
 
