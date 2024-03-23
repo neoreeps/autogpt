@@ -126,14 +126,13 @@ def main() -> None:
 
     log.info("Starting main function")
 
-    # preload variables
-    uploaded_file_1 = None
-    uploaded_file_2 = None
-
     # Set up the layout of the Streamlit app
     st.set_page_config(page_title="Content GPT Writer", layout="wide")
     st.title("Auto GPT")
     st.write('See the code: https://github.com/neoreeps/autogpt')
+
+    # Add a file uploader for documents
+    uploaded_files = []
 
     # Add a sidebar for settings
     with st.sidebar:
@@ -146,26 +145,24 @@ def main() -> None:
         log.debug(f"Selected GPT engine: {gpt_engine_choice}")
         temp = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
         hist_len = st.slider("Select the history length:", 1, 25, 15)
-        content_type = st.radio("Select the type of content to generate or improve:",
-                                ("general", "code", "document", "todoist"))
+        content_type = st.radio("Select the type of agent to use:",
+                                ("general", "todoist"))
 
         welcome = "Ask me anything and I'll do my best." + \
             f"  I remember context up to the last {hist_len} messages." + \
             "  I can generate or improve code and todo lists."
 
-        if content_type == "code":
-            welcome = "Tell me what you'd like the code to do, or paste existing code here if you want to improve it."  # noqa
-        elif content_type == "document":
-            welcome = "Use the input and output document fields to specify the content."
-            uploaded_file_1 = st.file_uploader("Choose Document 1", type=["docx", "pdf"])
-            uploaded_file_2 = st.file_uploader("Choose Document 2", type=["docx", "pdf"])
-        elif content_type == "todoist":
+        if content_type == "todoist":
             todoist_api_key = os.getenv('TODOIST_API_KEY', None)
             if not todoist_api_key:
                 st.write("You must provide a Todoist API key set in the environment.")
             max_actions = st.slider("Select the maximum number of actions to take:", 1, 300, 50)
             st.write("Todoist integration based largely on https://github.com/j0rd1smit/todoist_react_agent")
             welcome = "Ask me about your todo list or what you'd like to add to it."
+        else:
+            welcome = "Upload one or more documents to use in your context."
+            uploaded_files = st.file_uploader("Choose Document(s)", type=["docx", "pdf"], accept_multiple_files=True)
+            welcome = "Ask me anything and I'll do my best."
 
         if 'chatbot' in st.session_state and gpt_engine_choice != st.session_state.gpt_engine:
             del st.session_state.chatbot
@@ -178,15 +175,10 @@ def main() -> None:
     # Get the instance of the ChatBot class
     chatbot = st.session_state.chatbot
 
-    # Add text inputs for entering topic and existing content
-    st.markdown(f"### {content_type.upper()} Generator")
-
     # Set the system prompt
-    ext_prompt = "\nFollow the user's requirements carefully & to the letter."
-    if uploaded_file_1 is not None:
-        ext_prompt = ext_prompt + f"\nDOCUMENT1: {read_text_from_file(uploaded_file_1, log)}"
-    if uploaded_file_2 is not None:
-        ext_prompt = ext_prompt + f"\nDOCUMENT2: {read_text_from_file(uploaded_file_2, log)}"
+    ext_prompt = "\nFollow the user's requirements carefully and to the letter."
+    for x in range(0, len(uploaded_files)):
+        ext_prompt = ext_prompt + f"\nDOCUMENT {x}: {read_text_from_file(uploaded_files[x], log)}"
     chatbot.set_system_prompt(content_type, ext_prompt)
 
     # Allow the user to update the prompt

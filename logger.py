@@ -5,8 +5,7 @@ from pathlib import Path
 
 LOG_LEVEL = os.environ.get('LOGLEVEL', 'INFO').upper()
 TRACE_LEVEL = 9
-INFO_LOG_FMT = '[{asctime}] {levelname} {name} {message}'
-DEBUG_LOG_FMT = '{asctime} [{levelname:5}] {threadName:_^16} {name} {message}'
+DEBUG_LOG_FMT = '[{asctime}] [{levelname:4}] {name} -- {message}'
 DEBUG_LOG_PATH = 'logs/autogpt.log'
 
 logging.addLevelName(TRACE_LEVEL, 'TRACE')
@@ -33,17 +32,11 @@ def get_logger(name) -> logging.Logger:
         fh.setFormatter(formatter)
         logger.addHandler(fh)
 
-    # set log level
-    if LOG_LEVEL == 'INFO':
-        fmt = INFO_LOG_FMT
-    else:
-        fmt = DEBUG_LOG_FMT
-
     # set log format
     coloredlogs.install(
         logger=logger,
         level=LOG_LEVEL,
-        fmt=fmt,
+        fmt=DEBUG_LOG_FMT,
         style='{',
         field_styles={
             'asctime': {'faint': True, 'bold': False},

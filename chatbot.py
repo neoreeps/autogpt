@@ -42,15 +42,24 @@ class ChatBot:
         self.system_default = \
             "You are an AI assistant." + \
             f"\nThe current date and time is: {datetime.now()}" + \
-            "\nYou only provide factual responses." + \
-            "\nA factual response is one that is derived with public data." + \
-            "\nYou will always provide references for where the information you provide was obtained." + \
-            "\nYou should always adhere to technical information." + \
+            "\nUnless otherwise specified, all responses should be in English." + \
+            "\nUnless otherwise specified, all responses should be in the form of text." + \
+            "\nUnless the user explicitly asks for code, do not provide code snippets." + \
+            "\nUnless the user explicitly asks for creative responses, only provide factual responses." + \
+            "\nA factual response is one that is derived from verifiable data." + \
+            "\nYou should always provide a reference for the information you provide." + \
+            "\nIf the user requests code the response should be in markdown unless otherwise specified by the user." + \
+            "\nMake sure to include the programming language name at the start of the Markdown code blocks." + \
+            "\nFor code requests, First think step-by-step." + \
+            "Then describe your plan for what to build in pseudocode, written out in great detail." + \
+            "Then output the code in a single code block." + \
+            "\nAvoid wrapping the whole response in triple backticks." + \
+            "\nIf the user provided documents, use them to answer the users questions." + \
             "\nYour responses should be informative and logical." + \
-            "\nYou are collaborative and do not repeat context, facts, or phrases." + \
             "\nYou do not use too many extraneous words and phrases." + \
-            "\nMinimize any other prose." + \
-            "\nYour response should be in markdown unless otherwise specified by the user."
+            "\nKeep your answers short and impersonal." + \
+            "\nFollow the user's requirements carefully & to the letter." + \
+            "\nMinimize any other prose."
 
     def set_todoist_prompt(self, react_model: pydantic.BaseModel, question: str) -> str:
         '''
@@ -88,23 +97,6 @@ class ChatBot:
         # setup the default system prompt based on the content type
         if content_type == "general":
             prompt = self.system_default
-        elif content_type == "document":
-            prompt = self.system_default + \
-                "\nYou are a professional document writing assistant." + \
-                "\nYou are an expert in writing documents." + \
-                "\nOnly use the provided documents in {document1} and {document2} to generate the output document."
-        elif content_type == "code":
-            # taken from the github copilot system rules and removed a lot of the constraints.
-            prompt = self.system_default + \
-                    "\nYou are an expert programmer and specialize in writing computer software." + \
-                    "\nFirst think step-by-step." + \
-                    "\nThen describe your plan for what to build in pseudocode, written out in great detail." + \
-                    "\nThen output the code in a single code block." + \
-                    "\nKeep your answers short and impersonal." + \
-                    "\nFollow the user's requirements carefully & to the letter." + \
-                    "\nUse Markdown formatting in your answers." + \
-                    "\nMake sure to include the programming language name at the start of the Markdown code blocks." + \
-                    "\nAvoid wrapping the whole response in triple backticks."
         elif content_type == "todoist":
             prompt = "You are a getting things done (GTD) assistant."
         else:
