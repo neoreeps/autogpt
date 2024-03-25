@@ -143,8 +143,8 @@ def main() -> None:
 
         gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4-turbo-preview", "gpt-4", "gpt-3.5-turbo"))
         log.debug(f"Selected GPT engine: {gpt_engine_choice}")
-        temp = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.7)
-        hist_len = st.slider("Select the history length:", 1, 25, 15)
+        temp = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.5)
+        hist_len = st.slider("Select the history length:", 1, 50, 25)
         content_type = st.radio("Select the type of agent to use:",
                                 ("general", "todoist"))
 
