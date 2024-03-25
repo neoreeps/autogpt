@@ -160,8 +160,9 @@ def main() -> None:
             st.write("Todoist integration based largely on https://github.com/j0rd1smit/todoist_react_agent")
             welcome = "Ask me about your todo list or what you'd like to add to it."
         else:
-            welcome = "Upload one or more documents to use in your context."
-            uploaded_files = st.file_uploader("Choose Document(s)", type=["docx", "pdf"], accept_multiple_files=True)
+            uploaded_files = st.file_uploader("Upload one or more documents to use in your context",
+                                              type=["docx", "pdf"], accept_multiple_files=True)
+            st.write("Note: The documents will be used in the system prompt labeled as 'DOCUMENT 0', 'DOCUMENT 1', etc.")  # noqa
             welcome = "Ask me anything and I'll do my best."
 
         if 'chatbot' in st.session_state and gpt_engine_choice != st.session_state.gpt_engine:
