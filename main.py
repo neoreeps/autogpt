@@ -3,6 +3,7 @@ import json
 import fitz
 import streamlit as st
 from docx import Document
+from pptx import Presentation
 from streamlit_chat import message
 from chatbot import ChatBot
 from todoist_repair_agent import parse_base_model_with_retries
@@ -42,6 +43,15 @@ def read_text_from_file(file, log):
                     full_text.append(cell.text)
         for para in doc.paragraphs:
             full_text.append(para.text)
+        return "\n".join(full_text)
+    elif file_type == "pptx":
+        prs = Presentation(file)
+        full_text = []
+        for slide_number, slide in enumerate(prs.slides):
+            full_text.append(f"\nSlide {slide_number + 1}")
+            for shape in slide.shapes:
+                if hasattr(shape, "text"):
+                    full_text.append(shape.text)
         return "\n".join(full_text)
     elif file_type == "pdf":
         text = ""
@@ -161,7 +171,7 @@ def main() -> None:
             welcome = "Ask me about your todo list or what you'd like to add to it."
         else:
             uploaded_files = st.file_uploader("Upload one or more documents to use in your context",
-                                              type=["docx", "pdf"], accept_multiple_files=True)
+                                              type=["docx", "pptx", "pdf"], accept_multiple_files=True)
             st.write("Note: The documents will be used in the system prompt labeled as 'DOCUMENT 0', 'DOCUMENT 1', etc.")  # noqa
             welcome = "Ask me anything and I'll do my best."
 
