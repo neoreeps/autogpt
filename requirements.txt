@@ -25,6 +25,7 @@ distro==1.9.0
 docx2txt==0.8
 entrypoints==0.4
 etelemetry==0.3.1
+exceptiongroup==1.2.0
 filelock==3.13.1
 flake8==6.1.0
 frozenlist==1.4.1
@@ -100,6 +101,7 @@ pyrsistent==0.20.0
 python-dateutil==2.8.2
 python-docx==1.1.0
 python-dotenv==1.0.0
+python-pptx==0.6.23
 pytz==2023.3.post1
 pytz-deprecation-shim==0.1.0.post0
 pyxnat==1.6.2
@@ -111,7 +113,6 @@ requests==2.31.0
 rich==13.7.0
 rpds-py==0.16.2
 scipy==1.12.0
-setuptools==69.0.3
 simplejson==3.19.2
 six==1.16.0
 smmap==5.0.1
@@ -138,5 +139,6 @@ validators==0.22.0
 virtualenv==20.25.0
 watchdog==3.0.0
 wrapt==1.16.0
+XlsxWriter==3.2.0
 yarl==1.9.4
 zipp==3.17.0
