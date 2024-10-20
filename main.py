@@ -151,21 +151,25 @@ def main() -> None:
         if not openai_api_key:
             st.write("You must provide an OpenAI API key set in the environment.")
 
-        gpt_engine_choice = st.selectbox("Choose GPT engine:", ("gpt-4o", "gpt-4-turbo", "gpt-4-turbo-preview", "gpt-4", "gpt-3.5-turbo"))
+        gpt_engine_choice = st.selectbox(
+                "Choose GPT engine:", ("gpt-4o", "o1-preview",
+                                       "gpt-4-turbo", "gpt-4-turbo-preview", "gpt-4", "gpt-3.5-turbo"))
         log.debug(f"Selected GPT engine: {gpt_engine_choice}")
         temp = st.slider("Select the temperature (entropy): ", 0.0, 1.0, 0.5)
         hist_len = st.slider("Select the history length:", 1, 50, 25)
-        content_type = st.radio("Select the type of agent to use:",
-                                ("general", "todoist"))
+
+        # Disable and hide the todoist option if the API key is not set
+        todoist_api_key = os.getenv('TODOIST_API_KEY', None)
+        if todoist_api_key:
+            content_type = st.radio("Select the type of agent to use:", ("general", "todoist"))
+        else:
+            content_type = "general"
 
         welcome = "Ask me anything and I'll do my best." + \
             f"  I remember context up to the last {hist_len} messages." + \
             "  I can generate or improve code and todo lists."
 
         if content_type == "todoist":
-            todoist_api_key = os.getenv('TODOIST_API_KEY', None)
-            if not todoist_api_key:
-                st.write("You must provide a Todoist API key set in the environment.")
             max_actions = st.slider("Select the maximum number of actions to take:", 1, 300, 50)
             st.write("Todoist integration based largely on https://github.com/j0rd1smit/todoist_react_agent")
             welcome = "Ask me about your todo list or what you'd like to add to it."
