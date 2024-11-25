@@ -38,7 +38,7 @@ httpcore==1.0.2
 httplib2==0.22.0
 httpx==0.26.0
 humanfriendly==10.0
-idna==3.6
+idna==3.7
 importlib-metadata==6.11.0
 isodate==0.6.1
 Jinja2==3.1.3
